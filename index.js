@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY;
-const targetChatIds = [314589754, 6635151682];
+const targetChatIds = [480139962, 1215513514, 5516299360, 5557911188, 314589754, 6635151682];
 
 // Validate environment variables
 if (!API_KEY) {
