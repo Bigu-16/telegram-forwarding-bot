@@ -7,7 +7,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY;
-const targetChatIds = [480139962, 1215513514, 5516299360, 5557911188, 314589754, 6635151682];
+const targetChatIds = [
+  480139962, 1215513514, 5516299360, 5557911188, 314589754];
 
 // Validate environment variables
 if (!API_KEY) {
@@ -102,6 +103,9 @@ async function sendMessage(apiKey, chatId, text) {
     const data = await response.json();
     if (!data.ok) {
       console.error(`Failed to send message to ${chatId}:`, data.description);
+      if (data.description.includes("chat not found")) {
+        console.warn(`Ensure the bot is added to chat ${chatId}`);
+      }
     } else {
       console.log(`Successfully sent message to chat ${chatId}`);
     }
@@ -135,6 +139,18 @@ async function sendFile(apiKey, chatId, fileId, fileType) {
     }
   } catch (error) {
     console.error(`Error sending ${fileType} to ${chatId}:`, error);
+  }
+}
+
+async function sendMessageWithRetry(apiKey, chatId, text, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await sendMessage(apiKey, chatId, text);
+      return; // Exit if successful
+    } catch (error) {
+      if (attempt === retries) throw error; // Rethrow after max retries
+      console.warn(`Retrying (${attempt}/${retries})...`);
+    }
   }
 }
 
